@@ -1,41 +1,23 @@
-import { useSelector, useDispatch } from 'react-redux';
+import { useGetContactsQuery } from 'redux/contactsApi';
+import { useSelector } from 'react-redux';
 
-import { delContactAction } from '../../redux/actions';
-import { contactsListSelector, searchNameSelector } from 'redux/selectors';
+import { ContactItem } from 'components/ContactItem/ContactItem';
+import { searchNameSelector } from 'redux/selectors';
 
 export const ContactList = () => {
-  const dispatch = useDispatch();
-
-  const contacts = useSelector(contactsListSelector);
+  const { data: contacts = [] } = useGetContactsQuery();
   const serchName = useSelector(searchNameSelector);
-  const handledeleteContacts = itemId => {
-    dispatch(delContactAction(itemId));
-  };
+  const filteredContacts = contacts.filter(({ name }) =>
+    name.toLowerCase().includes(serchName.trim().toLowerCase())
+  );
 
   return (
     <ul>
       {contacts.length ? (
-        contacts.filter(({ name }) =>
-          name.toLowerCase().includes(serchName.toLowerCase())
-        ).length ? (
-          contacts
-            .filter(({ name }) =>
-              name.toLowerCase().includes(serchName.toLowerCase())
-            )
-            .map(el => {
-              return (
-                <li key={el.id}>
-                  <p>{el.name}</p>
-                  <p>{el.number}</p>
-                  <button
-                    type="button"
-                    onClick={() => handledeleteContacts(el.id)}
-                  >
-                    Delete
-                  </button>
-                </li>
-              );
-            })
+        filteredContacts.length ? (
+          filteredContacts.map(el => {
+            return <ContactItem key={el.id} {...el} />;
+          })
         ) : (
           <h3>We did not find any matches</h3>
         )
